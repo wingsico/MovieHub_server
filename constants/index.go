@@ -1,4 +1,4 @@
-package enum
+package constants
 
 var OrderMap = map[string]string{
 	Latest: "pub_year desc", // 最新上映
@@ -12,4 +12,13 @@ var (
 	Highest = "1"
 	Hottest = "2"
 	Trending = "3"
+)
+
+const MinKeyCount int = 10
+
+var (
+	AccessKey = "p2_HSflxPP8l0w9-Ym_r0KS6or9nWenH_DL8QnQ5"
+	SecretKey = "0jlSgVGke5-zCheC1Ht219HvoFpaMwq73GLUp6_h"
+	Bucket = "images"
+	Domain = "http://cdn.wingsico.org/"
 )

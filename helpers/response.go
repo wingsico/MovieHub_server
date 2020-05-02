@@ -5,49 +5,70 @@ import (
 	"net/http"
 )
 
-type Response struct {
+type ResponseWithData struct {
 	Code int         `json:"code"`
 	Data interface{} `json:"data"`
-	Msg  string      `json:"msg"`
+	Message  string      `json:"message"`
+}
+
+type ResponseWithoutData struct {
+	Code int `json:"code"`
+	Message string `json:"message"`
 }
 
 const (
-	ERROR   = 7
+	ERROR   = 10001
+	AUTH_ERROR = 10002
+	BIND_ERROR = 10003
 	SUCCESS = 0
 )
 
-func Result(code int, data interface{}, msg string, c *gin.Context) {
-	c.JSON(http.StatusOK, Response{
+func ResultWithData(code int, data interface{}, msg string, c *gin.Context) {
+	c.JSON(http.StatusOK, ResponseWithData{
 		code,
 		data,
 		msg,
 	})
 }
 
+func ResultWithoutData(code int, message string, c *gin.Context) {
+	c.JSON(http.StatusOK, ResponseWithoutData{
+		code,
+		message,
+	})
+}
+
+func FailErrorBind(message string, c *gin.Context) {
+	c.JSON(http.StatusBadRequest, ResponseWithoutData{
+		BIND_ERROR,
+		message,
+	})
+}
+
+func FailErrorAuth(message string, c *gin.Context) {
+	c.JSON(http.StatusUnauthorized, ResponseWithoutData{
+		AUTH_ERROR,
+		message,
+	})
+}
+
 func Ok(c *gin.Context) {
-	Result(SUCCESS, map[string]interface{}{}, "OK", c)
+	OkWithMessage("OK", c)
 }
 
 func OkWithMessage(message string, c *gin.Context) {
-	Result(SUCCESS, map[string]interface{}{}, message, c)
+	ResultWithoutData(SUCCESS, message, c)
 }
 
 func OkWithData(data interface{}, c *gin.Context) {
-	Result(SUCCESS, data, "OK", c)
+	ResultWithData(SUCCESS, data, "OK", c)
 }
 
-func OkDetailed(data interface{}, message string, c *gin.Context) {
-	Result(SUCCESS, data, message, c)
-}
 
 func Fail(c *gin.Context) {
-	Result(ERROR, map[string]interface{}{}, "ERROR", c)
+	FailWithMessage( "ERROR", c)
 }
 
 func FailWithMessage(message string, c *gin.Context) {
-	Result(ERROR, map[string]interface{}{}, message, c)
-}
-
-func FailWithDetailed(code int, data interface{}, message string, c *gin.Context) {
-	Result(code, data, message, c )
+	ResultWithoutData(ERROR, message, c)
 }
