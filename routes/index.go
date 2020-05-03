@@ -11,6 +11,7 @@ import (
 )
 
 func InitRouter() * gin.Engine {
+	gin.SetMode("release")
 	r := gin.Default()
 
 	r.Use(middlewares.CorsMiddleware())
