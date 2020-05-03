@@ -64,14 +64,14 @@ func GetAdmin(name string) (a Admin, err error) {
 	return
 }
 
-func CheckPassword(password string) (b bool) {
+func CheckUsername(password string) (b bool) {
 	if ok, _ := regexp.MatchString("^[a-zA-Z]([a-zA-Z0-9]){3,15}$", password); !ok {
 		return false
 	}
 	return true
 }
 
-func CheckUsername(username string) (b bool) {
+func CheckPassword(username string) (b bool) {
 	if ok, _ := regexp.MatchString("^[a-zA-Z]([a-zA-Z0-9.\\-_]){5,15}$", username); !ok {
 		return false
 	}
