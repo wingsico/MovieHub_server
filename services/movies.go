@@ -114,7 +114,10 @@ func UpdateMovie(req request.MovieUpdateRequest) (response.MovieDetailGetRespons
 	var err error
 	var res response.MovieDetailGetResponse
 
-	movie = req.Transfer2Movie()
+	if movie, err = req.Transfer2Movie(); err != nil {
+		return response.MovieDetailGetResponse{}, err
+	}
+
 	if err = movie.Validate(); err != nil {
 		return res, err
 	}

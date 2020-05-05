@@ -47,7 +47,7 @@ type MovieDetailGetResponse struct {
 	DoubanId          string     `json:"douban_id" binding:"required" gorm:"COLUMN:douban_id"`
 	Lang              string     `json:"lang" gorm:"COLUMN:lang"`
 	IMDbId            string     `json:"imdb_id" gorm:"COLUMN:imdb_id"`
-	ReleaseDate       *time.Time  `json:"release_date" gorm:"COLUMN:release_date"`
+	ReleaseDate       *time.Time `json:"release_date" gorm:"COLUMN:release_date"`
 	DoubanSummary     string     `json:"douban_summary" gorm:"COLUMN:douban_summary"`
 	IMDbSummary       string     `json:"imdb_summary" gorm:"COLUMN:imdb_summary"`
 	IMDbRating        float32    `json:"imdb_rating" binding:"required" gorm:"COLUMN:imdb_rating"`
@@ -65,6 +65,26 @@ type AdminLoginResponse struct {
 }
 
 type AdminInfoResponse struct {
-	Id   string `json:"id"`
+	Id   int    `json:"id,string"`
 	Name string `json:"name"`
+}
+
+type ReviewResponse struct {
+	Id          int32      `json:"id,string" binding:"required"`
+	Title       string     `json:"title" binding:"required"`
+	CreatedAt   *time.Time `json:"created_at" binding:"required"`
+	Content     string     `json:"content" binding:"required"`
+	Author      string     `json:"author" binding:"required"`
+	Source      string     `json:"source" binding:"required"`
+	SubjectId   int32      `json:"subject_id,string" binding:"required"`
+	Rating      float32    `json:"rating" binding:"required"`
+	UsefulCount int        `json:"useful_count" binding:"required"`
+}
+
+type ReviewListResponse struct {
+	Total   int                    `json:"total"`
+	Limit   int                    `json:"limit"`
+	Start   int                    `json:"start"`
+	Reviews []ReviewResponse       `json:"reviews"`
+	Subject MovieDetailGetResponse `json:"subject"`
 }

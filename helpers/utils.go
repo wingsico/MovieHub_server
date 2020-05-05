@@ -3,6 +3,7 @@ package helpers
 import (
 	"database/sql"
 	"github.com/segmentio/ksuid"
+	"github.com/wingsico/movie_server/errors"
 	"github.com/wingsico/movie_server/models"
 	"github.com/wingsico/movie_server/response"
 	"strconv"
@@ -29,7 +30,7 @@ func SliceAtoi32(sa []string) ([]int32, error) {
 	for _, a := range sa {
 		i, err := strconv.Atoi(a)
 		if err != nil {
-			return si, err
+			return si, errors.ErrIdType
 		}
 		si = append(si, int32(i))
 	}
@@ -58,6 +59,10 @@ func NewNullInt32(n int) sql.NullInt32 {
 
 
 func TransferMovies2Response(movies []models.Movie) (res []response.MovieBriefGetResponse) {
+	if movies == nil || len(movies) == 0 {
+		return make([]response.MovieBriefGetResponse, 0)
+	}
+
 	for _, m := range movies {
 		res = append(res, GetMovieBriefResponse(m))
 	}
@@ -65,6 +70,21 @@ func TransferMovies2Response(movies []models.Movie) (res []response.MovieBriefGe
 }
 
 func GetMovieDetailResponse(m models.Movie) (movie response.MovieDetailGetResponse) {
+	 if m.Genres == nil || len(m.Genres) == 0 {
+	 	m.Genres = make([]models.Genre, 0)
+	 }
+	if m.Regions == nil || len(m.Regions) == 0 {
+		m.Regions = make([]models.Region, 0)
+	}
+	if m.Directors == nil || len(m.Directors) == 0 {
+		m.Directors = make([]models.Director, 0)
+	}
+	if m.Writers == nil || len(m.Writers) == 0 {
+		m.Writers = make([]models.Writer, 0)
+	}
+	if m.Actors == nil || len(m.Actors) == 0 {
+		m.Actors = make([]models.Actor, 0)
+	}
 	movie = response.MovieDetailGetResponse{
 		Genres:            m.Genres,
 		Regions:           m.Regions,
@@ -132,5 +152,29 @@ func BatchSaveKey(keys []models.Key) error {
 	return nil
 }
 
+func TransferReview2Response(r models.Review) (rr response.ReviewResponse) {
+	rr = response.ReviewResponse{
+		Id:          r.Id,
+		Title:       r.Title,
+		CreatedAt:   r.CreatedAt,
+		Content:     r.Content,
+		Author:      r.Author,
+		Source:      r.Source,
+		SubjectId:   r.SubjectId,
+		Rating:      r.Rating,
+		UsefulCount: r.UsefulCount,
+	}
+	return rr
+}
+
+func TransferReviewList2Response(rs []models.Review) (rrs []response.ReviewResponse) {
+	if rs == nil || len(rs) == 0 {
+		return make([]response.ReviewResponse, 0)
+	}
+	for _, m := range rs {
+		rrs = append(rrs, TransferReview2Response(m))
+	}
+	return
+}
 
 

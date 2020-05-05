@@ -11,7 +11,7 @@ func Get(c *gin.Context) {
 	context, _ := token.ParseRequest(c)
 
 	helpers.OkWithData(&response.AdminInfoResponse{
-		Id: string(context.ID),
+		Id: int(context.ID),
 		Name: context.Username,
 	}, c)
 }

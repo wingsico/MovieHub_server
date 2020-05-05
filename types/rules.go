@@ -10,10 +10,17 @@ type TypeRules struct {
 }
 
 type SearchRules struct {
+	Start    int
+	Limit    int
+	Title    string
+	Genre    int
+	Region   int
+	PubYears []int
+}
+
+type ReviewListGetRules struct {
 	Start int
 	Limit int
-	Title string
-	Genre int
-	Region int
-	PubYears []int
+	Id    int
+	Sort  string
 }

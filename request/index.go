@@ -25,7 +25,7 @@ type MovieListGetByRandomRequest struct {
 }
 
 type MovieListGetByIdListRequest struct {
-	Ids []string `form:"ids"`
+	Ids []string `json:"ids"`
 }
 
 type MovieListGetBySearchRequest struct {
@@ -38,7 +38,7 @@ type MovieListGetBySearchRequest struct {
 }
 
 type MovieDeleteRequest struct {
-	Ids []string `form:"ids" binding:"required"`
+	Ids []string `json:"ids" binding:"required"`
 }
 
 type MovieGetRequest struct {
@@ -46,27 +46,27 @@ type MovieGetRequest struct {
 }
 
 type MovieCreateRequest struct {
-	Title             string   `json:"title" binding:"required"`
-	Cover             string   `json:"cover" binding:"required"`
-	OriginTitle       string   `json:"origin_title"`
-	DoubanRating      float32  `json:"douban_rating"`
-	PubYear           int      `json:"pub_year"`
-	DoubanRatingCount int      `json:"douban_rating_count"`
-	DoubanId          string   `json:"douban_id"`
-	Lang              string   `json:"lang"`
-	IMDbId            string   `json:"imdb_id"`
-	ReleaseDate       *time.Time      `json:"release_date"`
-	DoubanSummary     string   `json:"douban_summary" binding:"required"`
-	IMDbSummary       string   `json:"imdb_summary"`
-	IMDbRating        float32  `json:"imdb_rating"`
-	IMDbRatingCount   int      `json:"imdb_rating_count"`
-	Duration          int      `json:"duration" binding:"required"`
-	Alias             string   `json:"alias"`
-	Directors         []string `json:"directors" binding:"required"`
-	Actors            []string `json:"actors" binding:"required"`
-	Writers           []string `json:"writers"`
-	Genres            []string `json:"genres" binding:"required"`
-	Regions           []string `json:"regions" binding:"required"`
+	Title             string     `json:"title" binding:"required"`
+	Cover             string     `json:"cover" binding:"required"`
+	OriginTitle       string     `json:"origin_title"`
+	DoubanRating      float32    `json:"douban_rating"`
+	PubYear           int        `json:"pub_year"`
+	DoubanRatingCount int        `json:"douban_rating_count"`
+	DoubanId          string     `json:"douban_id"`
+	Lang              string     `json:"lang"`
+	IMDbId            string     `json:"imdb_id"`
+	ReleaseDate       *time.Time `json:"release_date"`
+	DoubanSummary     string     `json:"douban_summary" binding:"required"`
+	IMDbSummary       string     `json:"imdb_summary"`
+	IMDbRating        float32    `json:"imdb_rating"`
+	IMDbRatingCount   int        `json:"imdb_rating_count"`
+	Duration          int        `json:"duration" binding:"required"`
+	Alias             string     `json:"alias"`
+	Directors         []string   `json:"directors" binding:"required"`
+	Actors            []string   `json:"actors" binding:"required"`
+	Writers           []string   `json:"writers"`
+	Genres            []string   `json:"genres" binding:"required"`
+	Regions           []string   `json:"regions" binding:"required"`
 }
 
 type MovieUpdateRequest struct {
@@ -101,9 +101,11 @@ func (r *MovieCreateRequest) Transfer2Movie() models.Movie {
 	return model
 }
 
-func (r *MovieUpdateRequest) Transfer2Movie() models.Movie {
-	id, _ := strconv.Atoi(r.Id)
-
+func (r *MovieUpdateRequest) Transfer2Movie() (models.Movie, error) {
+	id, err := strconv.Atoi(r.Id)
+	if err != nil {
+		return models.Movie{}, err
+	}
 	model := models.Movie{
 		Id:                int32(id),
 		Title:             r.Title,
@@ -128,7 +130,7 @@ func (r *MovieUpdateRequest) Transfer2Movie() models.Movie {
 		Actors:            models.Actor{}.GetListByNames(r.Actors),
 		Writers:           models.Writer{}.GetListByNames(r.Writers),
 	}
-	return model
+	return model, nil
 }
 
 type AdminCreateRequest struct {
@@ -161,4 +163,73 @@ type AdminLoginRequest struct {
 type UploadRequest struct {
 	Name string         `form:"name" binding:"required"`
 	File multipart.File `form:"file" binding:"required"`
+}
+
+type ReviewGetListRequest struct {
+	Id    string `form:"id" binding:"required"` // 电影ID
+	Start int    `form:"start"`
+	Limit int    `form:"limit"`
+	Sort  string `form:"sort"`
+}
+
+type ReviewGetRequest struct {
+	Id string `form:"id" binding:"required"` // 影评ID
+}
+
+type ReviewDeleteRequest struct {
+	Ids []string `form:"ids" binding:"required"` // 影评IDs
+}
+
+type ReviewCreateRequest struct {
+	Title       string     `json:"title" binding:"required"`
+	CreatedAt   *time.Time `json:"created_at" binding:"required"`
+	Content     string     `json:"content" binding:"required"`
+	Author      string     `json:"author" binding:"required"`
+	Source      string     `json:"source" binding:"required"`
+	SubjectId   string     `json:"subject_id" binding:"required"`
+	Rating      float32    `json:"rating" binding:"required"`
+	UsefulCount int        `json:"useful_count" binding:"required"`
+}
+
+type ReviewUpdateRequest struct {
+	Id string `json:"id" binding:"required"`
+	ReviewCreateRequest
+}
+
+func (r *ReviewCreateRequest) Transfer2Review() (models.Review, error) {
+	id, err := strconv.Atoi(r.SubjectId)
+	if err != nil {
+		return models.Review{}, err
+	}
+	review := models.Review{
+		Title:       r.Title,
+		Content:     r.Content,
+		CreatedAt:   r.CreatedAt,
+		Source:      r.Source,
+		UsefulCount: r.UsefulCount,
+		Author:      r.Author,
+		Rating:      r.Rating,
+		SubjectId:   int32(id),
+	}
+	return review, nil
+}
+
+func (r *ReviewUpdateRequest) Transfer2Review() (models.Review, error) {
+	subjectId, err := strconv.Atoi(r.SubjectId)
+	reviewId, err := strconv.Atoi(r.Id)
+	if err != nil {
+		return models.Review{}, err
+	}
+	review := models.Review{
+		Id:          int32(reviewId),
+		Title:       r.Title,
+		Content:     r.Content,
+		CreatedAt:   r.CreatedAt,
+		Source:      r.Source,
+		UsefulCount: r.UsefulCount,
+		Author:      r.Author,
+		Rating:      r.Rating,
+		SubjectId:   int32(subjectId),
+	}
+	return review, nil
 }

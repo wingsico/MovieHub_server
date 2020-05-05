@@ -6,11 +6,12 @@ import (
 	"github.com/wingsico/movie_server/handlers/constants"
 	"github.com/wingsico/movie_server/handlers/movie/detail"
 	"github.com/wingsico/movie_server/handlers/movie/list"
+	movie_review "github.com/wingsico/movie_server/handlers/movie/review"
 	"github.com/wingsico/movie_server/handlers/upload"
 	"github.com/wingsico/movie_server/middlewares"
 )
 
-func InitRouter() * gin.Engine {
+func InitRouter() *gin.Engine {
 	gin.SetMode("release")
 	r := gin.Default()
 
@@ -19,6 +20,16 @@ func InitRouter() * gin.Engine {
 	{
 		m := api.Group("/movie")
 		{
+			m.GET("", movie_detail.GetById)
+
+			authorized := m.Group("/")
+			authorized.Use(middlewares.AuthMiddleware())
+			{
+				authorized.POST("/delete", movie_detail.DeleteByIds)
+				authorized.PUT("/update", movie_detail.Update)
+				authorized.POST("/create", movie_detail.Create)
+			}
+
 			l := m.Group("/list")
 			{
 				l.GET("/search", movie_list.GetBySearch)
@@ -27,28 +38,31 @@ func InitRouter() * gin.Engine {
 				l.POST("/ids", movie_list.GetByIds)
 			}
 
-			m.GET("", movie_detail.GetById)
-
-			m.Use(middlewares.AuthMiddleware())
+			r := m.Group("/review")
 			{
-				m.POST("/delete", movie_detail.DeleteByIds)
-				m.PUT("/update", movie_detail.Update)
-				m.POST("/create", movie_detail.Create)
+				r.GET("/list", movie_review.GetList)
+				r.GET("", movie_review.Get)
+
+				authorized := r.Group("/")
+				authorized.Use(middlewares.AuthMiddleware())
+				{
+					authorized.PUT("/update", movie_review.Update)
+					authorized.POST("/delete", movie_review.Delete)
+					authorized.POST("/create", movie_review.Create)
+				}
 			}
+
 		}
 
 		a := api.Group("/admin")
 		{
 			a.POST("/register", admin.Create)
 			a.POST("/login", admin.Login)
-			a.Use(middlewares.AuthMiddleware()).GET("/info", admin.Get)
+			a.GET("/info", middlewares.AuthMiddleware(), admin.Get)
 		}
 
 		api.GET("/constants", constants.Get)
-		u := api.Use(middlewares.AuthMiddleware())
-		{
-			u.POST("/upload", upload.Upload)
-		}
+		api.POST("/upload", middlewares.AuthMiddleware(), upload.Upload)
 
 	}
 
