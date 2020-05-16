@@ -13,5 +13,7 @@ var (
 	ErrInvalidToken = errors.New("无效的token")
 	ErrUserNameFormatError = errors.New("用户名只能是4-16位的英文或数字的组合")
 	ErrUserPasswordFormatError = errors.New("密码只能是4-16位的英文或数字的组合")
-	ErrIdType = errors.New("id必须是整数字符串")
+	ErrIdType = errors.New("id必须是正整数字符串")
+	ErrMovieNotExisted = errors.New("该电影不存在")
+	ErrReviewNotExisted = errors.New("该影评不存在")
 )

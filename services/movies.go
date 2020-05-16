@@ -2,6 +2,7 @@ package services
 
 import (
 	_const "github.com/wingsico/movie_server/constants"
+	"github.com/wingsico/movie_server/errors"
 	"github.com/wingsico/movie_server/helpers"
 	m "github.com/wingsico/movie_server/models"
 	"github.com/wingsico/movie_server/request"
@@ -88,11 +89,11 @@ func GetMovie(req request.MovieGetRequest) (response.MovieDetailGetResponse, err
 	var err error
 	var id int
 	if id, err = strconv.Atoi(req.Id); err != nil {
-		return response.MovieDetailGetResponse{}, err
+		return response.MovieDetailGetResponse{}, errors.ErrIdType
 	}
 
 	if movie, err = movie.Get(int32(id)); err != nil {
-		return response.MovieDetailGetResponse{}, err
+		return response.MovieDetailGetResponse{}, errors.ErrMovieNotExisted
 	}
 
 	return helpers.GetMovieDetailResponse(movie), nil
@@ -122,6 +123,9 @@ func UpdateMovie(req request.MovieUpdateRequest) (response.MovieDetailGetRespons
 		return res, err
 	}
 
+	if _, err = movie.Get(movie.Id); err != nil {
+		return res, errors.ErrMovieNotExisted
+	}
 	if err = movie.Update(); err != nil {
 		return res, err
 	}

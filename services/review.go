@@ -1,6 +1,7 @@
 package services
 
 import (
+	"github.com/wingsico/movie_server/errors"
 	"github.com/wingsico/movie_server/helpers"
 	"github.com/wingsico/movie_server/models"
 	"github.com/wingsico/movie_server/request"
@@ -19,7 +20,7 @@ func GetReview(req request.ReviewGetRequest) (response.ReviewResponse,  error) {
 
 	review, err := r.Get(int32(id))
 
-	return helpers.TransferReview2Response(review), nil
+	return helpers.TransferReview2Response(review, true), nil
 }
 
 func CreateReview(req request.ReviewCreateRequest) (response.ReviewResponse,  error) {
@@ -32,7 +33,7 @@ func CreateReview(req request.ReviewCreateRequest) (response.ReviewResponse,  er
 		return response.ReviewResponse{}, err
 	}
 
-	return helpers.TransferReview2Response(r), nil
+	return helpers.TransferReview2Response(r, true), nil
 }
 
 func UpdateReview(req request.ReviewUpdateRequest) (response.ReviewResponse,  error) {
@@ -40,12 +41,14 @@ func UpdateReview(req request.ReviewUpdateRequest) (response.ReviewResponse,  er
 	if err != nil {
 		return response.ReviewResponse{}, err
 	}
-
+	if _, err = r.Get(r.Id); err != nil {
+		return response.ReviewResponse{}, errors.ErrReviewNotExisted
+	}
 	if err := r.Update(); err != nil {
 		return response.ReviewResponse{}, err
 	}
 
-	return helpers.TransferReview2Response(r), nil
+	return helpers.TransferReview2Response(r, true), nil
 }
 
 func DeleteReview(req request.ReviewDeleteRequest) error {

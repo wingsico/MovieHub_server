@@ -3,7 +3,6 @@ package models
 import (
 	"database/sql"
 	"github.com/go-playground/validator/v10"
-	"github.com/jinzhu/gorm"
 	. "github.com/wingsico/movie_server/db"
 	"github.com/wingsico/movie_server/types"
 	"time"
@@ -75,6 +74,7 @@ func (m *Movie) Create() (err error) {
 	return
 }
 
+
 func (Movie) GetMoviesByIds(ids []int32) (movies []Movie, err error) {
 	err = Db.Model(movies).Where("id in (?)", ids).Find(&movies).Error
 	return
@@ -85,6 +85,7 @@ func (Movie) GetList(rules types.TypeRules) (movies []Movie, total int, err erro
 	if len(rules.Genres) != 0 {
 		ex = ex.Where("id in (?)", Db.Table("movie_genre").Select("movie_id").Where("genre_id in (?)", rules.Genres).QueryExpr())
 	}
+
 	if len(rules.Regions) != 0 {
 		ex = ex.Where("id in (?)", Db.Table("movie_region").Select("movie_id").Where("region_id in (?)", rules.Regions).QueryExpr())
 	}
@@ -104,8 +105,12 @@ func (Movie) GetList(rules types.TypeRules) (movies []Movie, total int, err erro
 }
 
 func (Movie) GetSearchResult(rules types.SearchRules) (movies []Movie, total int, err error) {
-	ex := Db.Model(movies).Where("virtual_keywords like ? ", "%"+rules.Title+"%").Order(
-		gorm.Expr("(CASE WHEN virtual_keywords = ? THEN 1 WHEN virtual_keywords like  ? THEN 2 WHEN virtual_keywords like ? THEN 3 WHEN virtual_keywords like ? THEN 4 ELSE 5 END)", rules.Title, rules.Title+"%", "%"+rules.Title+"%", "%"+rules.Title))
+	//ex := Db.Model(movies).Where("virtual_keywords like ? ", "%"+rules.Title+"%").Order(
+	//	gorm.Expr("(CASE WHEN virtual_keywords = ? THEN 1 WHEN virtual_keywords like  ? THEN 2 WHEN virtual_keywords like ? THEN 3 WHEN virtual_keywords like ? THEN 4 ELSE 5 END)", rules.Title, rules.Title+"%", "%"+rules.Title+"%", "%"+rules.Title))
+
+	ex := Db.Model(movies).Where("id in (?)", Db.Model(movies).Select("id").Where("virtual_keywords like ?", "%" + rules.Title + "%").QueryExpr())
+	//.Order(
+	//		gorm.Expr("(CASE WHEN virtual_keywords = ? THEN 1 WHEN virtual_keywords like  ? THEN 2 WHEN virtual_keywords like ? THEN 3 WHEN virtual_keywords like ? THEN 4 ELSE 5 END)", rules.Title, rules.Title+"%", "%"+rules.Title+"%", "%"+rules.Title))
 	if rules.Genre != 0 {
 		ex = ex.Where("id in (?)", Db.Table("movie_genre").Select("movie_id").Where("genre_id = ?", rules.Genre).QueryExpr())
 	}

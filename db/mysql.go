@@ -12,13 +12,26 @@ import (
 var Db *gorm.DB
 func init() {
 	var err error
-	connectionConf := conf.ConnectionConf{
-		Host: os.Getenv("DB_HOST"),
-		User: os.Getenv("DB_USER"),
-		Password: os.Getenv("DB_PASSWORD"),
-		Port: os.Getenv("DB_PORT"),
-		Database: os.Getenv("DB_NAME"),
+	var connectionConf conf.ConnectionConf
+
+	if os.Getenv("ENV") == "dev" {
+		connectionConf = conf.ConnectionConf{
+			Host: os.Getenv("DB_DEV_HOST"),
+			User: os.Getenv("DB_DEV_USER"),
+			Password: os.Getenv("DB_DEV_PASSWORD"),
+			Port: os.Getenv("DB_PORT"),
+			Database: os.Getenv("DB_NAME"),
+		}
+	} else {
+		connectionConf = conf.ConnectionConf{
+			Host: os.Getenv("DB_PROD_HOST"),
+			User: os.Getenv("DB_PROD_USER"),
+			Password: os.Getenv("DB_PROD_PASSWORD"),
+			Port: os.Getenv("DB_PORT"),
+			Database: os.Getenv("DB_NAME"),
+		}
 	}
+
 
 	Db, err = connectionConf.Connect()
 

@@ -57,7 +57,6 @@ func NewNullInt32(n int) sql.NullInt32 {
 	}
 }
 
-
 func TransferMovies2Response(movies []models.Movie) (res []response.MovieBriefGetResponse) {
 	if movies == nil || len(movies) == 0 {
 		return make([]response.MovieBriefGetResponse, 0)
@@ -70,9 +69,9 @@ func TransferMovies2Response(movies []models.Movie) (res []response.MovieBriefGe
 }
 
 func GetMovieDetailResponse(m models.Movie) (movie response.MovieDetailGetResponse) {
-	 if m.Genres == nil || len(m.Genres) == 0 {
-	 	m.Genres = make([]models.Genre, 0)
-	 }
+	if m.Genres == nil || len(m.Genres) == 0 {
+		m.Genres = make([]models.Genre, 0)
+	}
 	if m.Regions == nil || len(m.Regions) == 0 {
 		m.Regions = make([]models.Region, 0)
 	}
@@ -106,7 +105,7 @@ func GetMovieDetailResponse(m models.Movie) (movie response.MovieDetailGetRespon
 		Lang:              m.Lang,
 		IMDbId:            m.IMDbId.String,
 		IMDbRating:        m.IMDbRating,
-		IMDbRatingCount: m.IMDbRatingCount,
+		IMDbRatingCount:   m.IMDbRatingCount,
 		Duration:          m.Duration,
 	}
 	return
@@ -152,12 +151,18 @@ func BatchSaveKey(keys []models.Key) error {
 	return nil
 }
 
-func TransferReview2Response(r models.Review) (rr response.ReviewResponse) {
+func TransferReview2Response(r models.Review, isDetail bool) (rr response.ReviewResponse) {
+	content := r.Content
+	limitLength := 80
+	if len([]rune(content)) > limitLength && !isDetail {
+		content = string([]rune(r.Content)[:limitLength]) + "..."
+		content = strings.Replace(content, "\n", "", -1)
+	}
 	rr = response.ReviewResponse{
 		Id:          r.Id,
 		Title:       r.Title,
 		CreatedAt:   r.CreatedAt,
-		Content:     r.Content,
+		Content:     content,
 		Author:      r.Author,
 		Source:      r.Source,
 		SubjectId:   r.SubjectId,
@@ -172,9 +177,7 @@ func TransferReviewList2Response(rs []models.Review) (rrs []response.ReviewRespo
 		return make([]response.ReviewResponse, 0)
 	}
 	for _, m := range rs {
-		rrs = append(rrs, TransferReview2Response(m))
+		rrs = append(rrs, TransferReview2Response(m, false))
 	}
 	return
 }
-
-
